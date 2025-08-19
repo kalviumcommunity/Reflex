@@ -73,3 +73,5 @@ python collect_data.py --label no_event --count 500
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/keerthan-kodi-48209931b/
 
+Thank you
+
