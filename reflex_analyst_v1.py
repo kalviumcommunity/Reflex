@@ -78,5 +78,7 @@ def main():
     print("--- Apex Legends Event ---")
     print(f"Generated Commentary: {event2_commentary}\n")
 
+
+
 if __name__ == "__main__":
     main()
