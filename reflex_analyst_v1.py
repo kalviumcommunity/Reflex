@@ -4,7 +4,7 @@ import google.generativeai as genai
 def setup_api_key():
     """
     Loads the Google API key from an environment variable and configures the SDK.
-    Raises an error if the key is not found.
+    Raises an error if the key is not found yes.
     """
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
