@@ -4,7 +4,6 @@ import google.generativeai as genai
 def setup_api_key():
     """
     Loads the Google API key from an environment variable and configures the SDK.
-    Raises an error if the key is not found.
     """
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
@@ -13,15 +12,16 @@ def setup_api_key():
         )
     genai.configure(api_key=api_key)
 
-def generate_game_commentary(event_type: str, player_name: str, game_name: str, style: str = 'hype') -> str:
+def generate_game_commentary(event_type: str, player_name: str, game_name: str, style: str = 'hype', length: str = 'short') -> str:
     """
-    Generates commentary for a specific game event using a dynamic prompt and creative styles.
+    Generates commentary with controls for style and length.
 
     Args:
         event_type: The type of event that occurred.
         player_name: The name of the player.
         game_name: The name of the game.
-        style: The desired commentary style ('hype' or 'analytical').
+        style: The creative style ('hype' or 'analytical').
+        length: The desired output length ('short' or 'long').
 
     Returns:
         The AI-generated commentary as a string.
@@ -29,28 +29,32 @@ def generate_game_commentary(event_type: str, player_name: str, game_name: str, 
     try:
         model = genai.GenerativeModel('gemini-pro')
 
-        # --- NEW: Configure generation based on style ---
-        # This demonstrates the "Temperature" and "Top_P" concepts.
-        if style.lower() == 'hype':
-            # High temperature for more creative, less predictable responses.
-            config = genai.types.GenerationConfig(temperature=0.9, top_p=0.95)
-        else: # 'analytical'
-            # Low temperature for more factual, focused responses.
-            config = genai.types.GenerationConfig(temperature=0.2, top_p=0.8)
+        # Set temperature based on style
+        temperature = 0.9 if style.lower() == 'hype' else 0.2
+        
+        # --- NEW: Set max tokens based on length ---
+        # This demonstrates the "Tokens and Tokenization" concept.
+        max_tokens = 25 if length.lower() == 'short' else 75
+        
+        config = genai.types.GenerationConfig(
+            temperature=temperature,
+            top_p=0.95,
+            max_output_tokens=max_tokens
+        )
 
         system_prompt = (
-            "You are 'Reflex,' a witty esports commentator AI who creates short, exciting "
-            "descriptions of gameplay moments."
+            "You are 'Reflex,' a witty esports commentator AI who creates "
+            "exciting descriptions of gameplay moments."
         )
 
         user_prompt = (
-            f"In the game {game_name}, the player '{player_name}' just performed the event: "
-            f"'{event_type}'. Generate one commentary line in an '{style}' tone."
+            f"In {game_name}, player '{player_name}' just got a '{event_type}'. "
+            f"Generate one commentary line in an '{style}' tone. "
+            f"Keep the response {length}."
         )
 
         full_prompt = f"{system_prompt}\n\n{user_prompt}"
 
-        # --- NEW: Pass the configuration to the model ---
         response = model.generate_content(full_prompt, generation_config=config)
         return response.text
 
@@ -65,25 +69,27 @@ def main():
     setup_api_key()
     print("Setup complete.\n")
 
-    # --- Example 1: Hype Style ---
-    hype_commentary = generate_game_commentary(
-        event_type="Team Wipe",
-        player_name="Bangalore",
-        game_name="Apex Legends",
-        style="hype"
-    )
-    print("--- Hype Commentary ---")
-    print(f"Generated: {hype_commentary}\n")
-
-    # --- Example 2: Analytical Style ---
-    analytical_commentary = generate_game_commentary(
-        event_type="Clutch Defuse",
-        player_name="Cypher",
+    # --- Example 1: Short Commentary ---
+    short_commentary = generate_game_commentary(
+        event_type="Flawless Round",
+        player_name="Sova",
         game_name="Valorant",
-        style="analytical"
+        style="hype",
+        length="short"
     )
-    print("--- Analytical Commentary ---")
-    print(f"Generated: {analytical_commentary}\n")
+    print("--- Short Hype Commentary (Max 25 Tokens) ---")
+    print(f"Generated: {short_commentary}\n")
+
+    # --- Example 2: Long Commentary ---
+    long_commentary = generate_game_commentary(
+        event_type="Winning Kill",
+        player_name="Wraith",
+        game_name="Apex Legends",
+        style="analytical",
+        length="long"
+    )
+    print("--- Long Analytical Commentary (Max 75 Tokens) ---")
+    print(f"Generated: {long_commentary}\n")
 
 if __name__ == "__main__":
     main()
